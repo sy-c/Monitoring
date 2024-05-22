@@ -248,6 +248,7 @@ foreach (example ${EXAMPLES})
   target_link_libraries(${example_name}
     PRIVATE
       Monitoring Boost::program_options
+      $<$<BOOL:${CURL_FOUND}>:CURL::libcurl>
   )
 endforeach()
 

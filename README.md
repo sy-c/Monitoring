@@ -250,15 +250,18 @@ for (;;) {
   auto metrics = client->pull();
   if (!metrics.empty()) {
     /// metric.first => topic name; metric.second => metric itself
+  } else {
+    // wait a bit if no data available
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-}
 ```
 
 Run-time parameters:
 - `<topic-to-subscribe>` - List of topics to subscribe
 - `<kafka-server:9092>` - Kafka broker (staging or production)
 - `<client_id>` - unique, self-explainable string describing the client, eg. `dcs-link-status` or `its-link-status`.
+
+Metrics are returned in batch of maximum 100 for each pull() call.
 
 ### Data format
 Native data format is [Influx Line Protocol](https://docs.influxdata.com/influxdb/latest/reference/syntax/line-protocol/) but metrics can be converted into any format listed in here: https://docs.influxdata.com/telegraf/latest/data_formats/output/
