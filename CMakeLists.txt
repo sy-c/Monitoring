@@ -82,7 +82,9 @@ find_package(gRPC CONFIG)
 
 if(RDKAFKA_ROOT)
     message("RDKAFKA_ROOT set, we enable corresponding libs and binaries")
-    find_library(RDKAFKA_LIB "rdkafka++" REQUIRED PATHS ${RDKAFKA_ROOT}/lib)
+    find_library(RDKAFKA_LIB1 "rdkafka++" REQUIRED PATHS ${RDKAFKA_ROOT}/lib)
+    find_library(RDKAFKA_LIB2 "rdkafka" REQUIRED PATHS ${RDKAFKA_ROOT}/lib)
+    set(RDKAFKA_LIBS  ${RDKAFKA_LIB1} ${RDKAFKA_LIB2})
     set(RDKAFKA_INCLUDE "${RDKAFKA_ROOT}/include")
     set(RdKafka_FOUND true)
 else()
@@ -162,7 +164,7 @@ set_target_properties(Monitoring PROPERTIES OUTPUT_NAME "O2Monitoring")
 target_link_libraries(Monitoring
   PUBLIC
     Boost::boost
-    $<$<BOOL:${RdKafka_FOUND}>:${RDKAFKA_LIB}>
+    $<$<BOOL:${RdKafka_FOUND}>:${RDKAFKA_LIBS}>
   PRIVATE
     Boost::system
     pthread
@@ -259,7 +261,7 @@ foreach (example ${EXAMPLES})
       pthread
       Monitoring Boost::program_options
       $<$<BOOL:${CURL_FOUND}>:CURL::libcurl>
-      $<$<BOOL:${RdKafka_FOUND}>:${RDKAFKA_LIB}>
+      $<$<BOOL:${RdKafka_FOUND}>:${RDKAFKA_LIBS}>
   )
 endforeach()
 
@@ -301,7 +303,7 @@ if(RdKafka_FOUND AND Protobuf_FOUND AND CURL_FOUND)
       Boost::program_options
       protobuf::libprotobuf
       $<$<BOOL:${InfoLogger_FOUND}>:AliceO2::InfoLogger>
-      $<$<BOOL:${RdKafka_FOUND}>:${RDKAFKA_LIB}>
+      $<$<BOOL:${RdKafka_FOUND}>:${RDKAFKA_LIBS}>
     )
     target_compile_definitions(${example_name} PRIVATE $<$<BOOL:${InfoLogger_FOUND}>:O2_MONITORING_WITH_INFOLOGGER>)
     target_include_directories(${example_name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
